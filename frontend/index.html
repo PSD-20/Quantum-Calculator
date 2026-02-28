@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quantum Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center h-screen text-white">
+
+<div class="bg-gray-900 p-6 rounded-3xl shadow-2xl w-80 border border-gray-700">
+    
+    <!-- Display -->
+    <input id="display" type="text" disabled
+        class="w-full mb-5 p-4 text-right text-2xl rounded-xl bg-black text-green-400 font-mono">
+
+    <div class="grid grid-cols-4 gap-3">
+
+        <!-- Row 1 -->
+        <button onclick="clearAll()" class="btn bg-red-600 col-span-2">AC</button>
+        <button onclick="backspace()" class="btn bg-white text-black hover:bg-gray-200">
+            <svg xmlns="http://www.w3.org/2000/svg" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                stroke="white" 
+                stroke-width="2"
+                class="w-6 h-6">
+                <path d="M21 4H8L3 12l5 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/>
+                <line x1="18" y1="9" x2="12" y2="15"/>
+                <line x1="12" y1="9" x2="18" y2="15"/>
+            </svg>
+        </button>
+        <button onclick="setOperator('/')" class="btn operator">÷</button>
+
+        <!-- Row 2 -->
+        <button onclick="press('7')" class="btn">7</button>
+        <button onclick="press('8')" class="btn">8</button>
+        <button onclick="press('9')" class="btn">9</button>
+        <button onclick="setOperator('*')" class="btn operator">×</button>
+
+        <!-- Row 3 -->
+        <button onclick="press('4')" class="btn">4</button>
+        <button onclick="press('5')" class="btn">5</button>
+        <button onclick="press('6')" class="btn">6</button>
+        <button onclick="setOperator('-')" class="btn operator">−</button>
+
+        <!-- Row 4 -->
+        <button onclick="press('1')" class="btn">1</button>
+        <button onclick="press('2')" class="btn">2</button>
+        <button onclick="press('3')" class="btn">3</button>
+        <button onclick="setOperator('+')" class="btn operator">+</button>
+
+        <!-- Bottom Row -->
+        <button onclick="press('0')" class="btn col-span-2">0</button>
+        <button onclick="press('.')" class="btn">.</button>
+        <button onclick="calculate()" 
+            class="btn bg-blue-600 hover:bg-blue-700">
+            =
+        </button>
+
+    </div>
+</div>
+
+<style>
+.btn {
+    padding: 1rem;
+    border-radius: 0.75rem;
+    font-size: 1.2rem;
+    background-color: #374151;
+    transition: 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn:hover {
+    transform: scale(1.05);
+    background-color: #4b5563;
+}
+
+.operator {
+    background-color: #9333ea;
+}
+
+.operator:hover {
+    background-color: #a855f7;
+}
+</style>
+
+<script>
+let firstNumber = "";
+let secondNumber = "";
+let operator = "";
+let enteringSecond = false;
+
+function press(value) {
+    if (!enteringSecond) {
+        firstNumber += value;
+        document.getElementById("display").value = firstNumber;
+    } else {
+        secondNumber += value;
+        document.getElementById("display").value = secondNumber;
+    }
+}
+
+function setOperator(op) {
+    if (firstNumber === "") return;
+    operator = op;
+    enteringSecond = true;
+}
+
+function clearAll() {
+    firstNumber = "";
+    secondNumber = "";
+    operator = "";
+    enteringSecond = false;
+    document.getElementById("display").value = "";
+}
+
+function backspace() {
+    if (!enteringSecond) {
+        firstNumber = firstNumber.slice(0, -1);
+        document.getElementById("display").value = firstNumber;
+    } else {
+        secondNumber = secondNumber.slice(0, -1);
+        document.getElementById("display").value = secondNumber;
+    }
+}
+
+async function calculate() {
+    if (firstNumber === "" || secondNumber === "") return;
+
+    const opMap = {
+        "+": "add",
+        "-": "subtract",
+        "*": "multiply",
+        "/": "divide"
+    };
+
+    const response = await fetch("/calculate", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            a: parseFloat(firstNumber),
+            b: parseFloat(secondNumber),
+            operation: opMap[operator]
+        })
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+        document.getElementById("display").value = data.result;
+        firstNumber = data.result.toString();
+        secondNumber = "";
+        enteringSecond = false;
+    } else {
+        document.getElementById("display").value = "Error";
+        firstNumber = "";
+        secondNumber = "";
+        enteringSecond = false;
+    }
+}
+</script>
+
+</body>
+</html> 
