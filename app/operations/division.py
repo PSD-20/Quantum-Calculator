@@ -83,5 +83,5 @@ def division(a:float, b: float):
 
     return div_ans"""
 
-d = division(10, 2)
-print(d)
+"""d = division(10, 2)
+print(d)"""
