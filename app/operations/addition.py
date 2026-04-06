@@ -1,7 +1,7 @@
-"""import pennylane as qml
+import pennylane as qml
 from pennylane import numpy as np
 
-def addition(a:float, b: float):
+"""def addition(a:float, b: float):
     
     # Define the Hamiltonian
     h = np.array([[a, 0],
@@ -28,7 +28,45 @@ def addition(a:float, b: float):
 
     return add_ans"""
 
-from qiskit import QuantumCircuit, transpile
+def get_precision(x):
+    s = str(x)
+    if '.' in s:
+        return len(s.split('.')[1])
+    return 0
+
+def addition(a:float, b:float):
+
+    dev = qml.device("default.qubit", wires=2)
+
+    # Define matrices
+    h = np.array([[a, 0],
+                  [0, 2]])
+
+    H = np.array([[b, 0],
+                  [0, 2]])
+
+    # Tensor product
+    H_total = np.kron(h, H)
+
+    # Hermitian observable
+    observable = qml.Hermitian(H_total, wires=[0, 1])
+
+    @qml.qnode(dev)
+    def circuit():
+
+        # Same circuit as Qiskit
+        qml.Hadamard(wires=0)
+        qml.PauliX(wires=1)
+        qml.CNOT(wires=[0, 1])
+   
+        return qml.expval(observable)
+    
+    expectation_value = circuit()
+
+    return(round(float(expectation_value), max(get_precision(a), get_precision(b))))
+    
+
+"""from qiskit import QuantumCircuit, transpile
 from qiskit.quantum_info import Statevector
 from qiskit.transpiler import generate_preset_pass_manager
 from qiskit.visualization import plot_histogram
@@ -43,12 +81,12 @@ from qiskit.quantum_info import Operator, SparsePauliOp
 
 def addition(a:float, b: float):
 
-    """#Real Hardware
+    #Real Hardware
     from qiskit_ibm_runtime import QiskitRuntimeService
 
     service = QiskitRuntimeService()
 
-    backend = service.least_busy(operational=True, simulator=False)"""
+    backend = service.least_busy(operational=True, simulator=False)
 
     #Fake Backend
     backend = FakeManilaV2()
@@ -78,8 +116,8 @@ def addition(a:float, b: float):
     job_result2 = job2.result()[0] # It will block until the job finishes.
     expv2 = job_result2.data.evs
     
-    return expv2
+    return expv2"""
 
-"""s = addition(3, 4)
-print(np.round(s, 3))"""
-#print(s)
+s = addition(3.459, 4.8533456)
+#print(np.round(s, 3))
+print(s)
