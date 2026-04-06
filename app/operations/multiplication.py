@@ -1,9 +1,46 @@
 import pennylane as qml
 from pennylane import numpy as np
 
-def multiplication(a:float, b: float):
 
-    if (a and b):
+def get_precision(x):
+    s = str(x)
+    if '.' in s:
+        return len(s.split('.')[1])
+    return 0
+
+
+def multiplication(a:float, b: float):
+    
+    dev = qml.device("default.qubit", wires=2)
+
+    # Define matrices
+    h = np.array([[a, 0],
+                  [0, 1]])
+
+    H = np.array([[b, 0],
+                  [0, 1]])
+
+    # Tensor product
+    H_total = np.kron(h, H)
+
+    # Hermitian observable
+    observable = qml.Hermitian(H_total, wires=[0, 1])
+
+    @qml.qnode(dev)
+    def circuit():
+
+        # Same circuit as Qiskit
+        """qml.Hadamard(wires=0)
+        qml.PauliX(wires=1)
+        qml.CNOT(wires=[0, 1])"""
+   
+        return qml.expval(observable)
+    
+    expectation_value = circuit()
+
+    return(round(float(expectation_value), max(get_precision(a), get_precision(b))))
+
+    """if (a and b):
         A = np.log(np.abs(a))
         B = np.log(np.abs(b))
 
@@ -33,4 +70,7 @@ def multiplication(a:float, b: float):
     else:
         mul_ans = 0
 
-    return mul_ans
+    return mul_ans"""
+
+"""s = multiplication(0, -5.5)
+print(s)"""

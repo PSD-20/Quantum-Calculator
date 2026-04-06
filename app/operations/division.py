@@ -1,9 +1,46 @@
 import pennylane as qml
 from pennylane import numpy as np
 
+"""
+def get_precision(x):
+    s = str(x)
+    if '.' in s:
+        return len(s.split('.')[1])
+    return 0"""
+
 def division(a:float, b: float):
+
+    dev = qml.device("default.qubit", wires=2)
+
+    # Define matrices
+    h = np.array([[a, 0],
+                  [0, 1]])
+
+    H = np.array([[1/b, 0],
+                  [0, 1]])
+
+    # Tensor product
+    H_total = np.kron(h, H)
+
+    # Hermitian observable
+    observable = qml.Hermitian(H_total, wires=[0, 1])
+
+    @qml.qnode(dev)
+    def circuit():
+
+        # Same circuit as Qiskit
+        """qml.Hadamard(wires=0)
+        qml.PauliX(wires=1)
+        qml.CNOT(wires=[0, 1])"""
+   
+        return qml.expval(observable)
     
-    if (a and b):
+    expectation_value = circuit()
+
+    #return(round(float(expectation_value), max(get_precision(a), get_precision(b))))
+    return(float(expectation_value))
+    
+    """if (a and b):
         A = np.log(np.abs(a))
         B = np.log(np.abs(b))
         # Define the Hamiltonian
@@ -35,4 +72,7 @@ def division(a:float, b: float):
     else:
         div_ans = np.inf
 
-    return div_ans
+    return div_ans"""
+
+"""d = division(10,0)
+print(d)"""
