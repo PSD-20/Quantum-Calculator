@@ -90,21 +90,34 @@ let firstNumber = "";
 let secondNumber = "";
 let operator = "";
 let enteringSecond = false;
+let justCalculated = false;
 
 function press(value) {
-    if (!enteringSecond) {
+    if (justCalculated) {
+        firstNumber = value;
+        secondNumber = "";
+        enteringSecond = false;
+        justCalculated = false;
+    } else if (!enteringSecond) {
         firstNumber += value;
-        document.getElementById("display").value = firstNumber;
     } else {
         secondNumber += value;
-        document.getElementById("display").value = secondNumber;
     }
+
+    document.getElementById("display").value =
+        enteringSecond ? secondNumber : firstNumber;
 }
 
 function setOperator(op) {
     if (firstNumber === "") return;
+
+    if (secondNumber !== "") {
+        calculate();
+    }
+
     operator = op;
     enteringSecond = true;
+    justCalculated = false;
 }
 
 function clearAll() {
@@ -112,6 +125,7 @@ function clearAll() {
     secondNumber = "";
     operator = "";
     enteringSecond = false;
+    justCalculated = false;
     document.getElementById("display").value = "";
 }
 
@@ -154,6 +168,7 @@ async function calculate() {
         firstNumber = data.result.toString();
         secondNumber = "";
         enteringSecond = false;
+        justCalculated = true;
     } else {
         document.getElementById("display").value = "Error";
         firstNumber = "";
