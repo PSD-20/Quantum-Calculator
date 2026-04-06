@@ -108,11 +108,12 @@ function press(value) {
         enteringSecond ? secondNumber : firstNumber;
 }
 
-function setOperator(op) {
+async function setOperator(op) {
     if (firstNumber === "") return;
 
+    // If already have second number → calculate first
     if (secondNumber !== "") {
-        calculate();
+        await calculate();   // ⭐ IMPORTANT
     }
 
     operator = op;
@@ -140,7 +141,7 @@ function backspace() {
 }
 
 async function calculate() {
-    if (firstNumber === "" || secondNumber === "") return;
+    if (firstNumber === "" || secondNumber === "" || operator === "") return;
 
     const opMap = {
         "+": "add",
