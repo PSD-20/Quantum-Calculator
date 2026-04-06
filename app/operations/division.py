@@ -8,37 +8,46 @@ def get_precision(x):
         return len(s.split('.')[1])
     return 0"""
 
+def smart_round(x, sig=10):
+    return float(f"{x:.{sig}g}")
+
 def division(a:float, b: float):
 
-    dev = qml.device("default.qubit", wires=2)
+    if(a and b):
+        dev = qml.device("default.qubit", wires=2)
 
-    # Define matrices
-    h = np.array([[a, 0],
-                  [0, 1]])
+        # Define matrices
+        h = np.array([[a, 0],
+                    [0, 1]])
 
-    H = np.array([[1/b, 0],
-                  [0, 1]])
+        H = np.array([[1/b, 0],
+                    [0, 1]])
 
-    # Tensor product
-    H_total = np.kron(h, H)
+        # Tensor product
+        H_total = np.kron(h, H)
 
-    # Hermitian observable
-    observable = qml.Hermitian(H_total, wires=[0, 1])
+        # Hermitian observable
+        observable = qml.Hermitian(H_total, wires=[0, 1])
 
-    @qml.qnode(dev)
-    def circuit():
+        @qml.qnode(dev)
+        def circuit():
 
-        # Same circuit as Qiskit
-        """qml.Hadamard(wires=0)
-        qml.PauliX(wires=1)
-        qml.CNOT(wires=[0, 1])"""
-   
-        return qml.expval(observable)
+            # Same circuit as Qiskit
+            """qml.Hadamard(wires=0)
+            qml.PauliX(wires=1)
+            qml.CNOT(wires=[0, 1])"""
     
-    expectation_value = circuit()
+            return qml.expval(observable)
+        
+        expectation_value = circuit()
 
+    elif(a == 0 and b):
+        expectation_value = 0
+
+    else:
+        expectation_value = np.inf
     #return(round(float(expectation_value), max(get_precision(a), get_precision(b))))
-    return(float(expectation_value))
+    return(smart_round(float(expectation_value)))
     
     """if (a and b):
         A = np.log(np.abs(a))
@@ -74,5 +83,5 @@ def division(a:float, b: float):
 
     return div_ans"""
 
-"""d = division(10,0)
-print(d)"""
+d = division(10, 2)
+print(d)
